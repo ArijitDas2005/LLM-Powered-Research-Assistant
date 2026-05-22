@@ -1,0 +1,14 @@
+[Unit]
+Description=Celery worker for research assistant API
+After=network.target redis.service
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/srv/research-assistant
+Environment="DJANGO_SETTINGS_MODULE=research_assistant_api.settings"
+ExecStart=/srv/research-assistant/venv/bin/celery -A research_assistant_api worker --loglevel=info
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

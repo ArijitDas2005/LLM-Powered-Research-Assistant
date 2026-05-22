@@ -1,0 +1,16 @@
+django
+djangorestframework
+djangorestframework-simplejwt
+psycopg2-binary
+celery
+redis
+django-celery-results
+yfinance
+newsapi-python
+sentence-transformers
+pgvector
+python-dotenv
+dj-database-url
+gunicorn
+pytest
+pytest-django

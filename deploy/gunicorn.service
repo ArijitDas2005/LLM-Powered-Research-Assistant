@@ -1,0 +1,14 @@
+[Unit]
+Description=Gunicorn service for research assistant API
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/srv/research-assistant
+Environment="DJANGO_SETTINGS_MODULE=research_assistant_api.settings"
+ExecStart=/srv/research-assistant/venv/bin/gunicorn research_assistant_api.wsgi:application --bind 127.0.0.1:8000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

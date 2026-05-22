@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Assistant API</title>
+    <style>
+        :root {
+            --bg: #f4efe7;
+            --panel: #fffaf2;
+            --ink: #1d2a33;
+            --muted: #66757f;
+            --line: #d9cdbf;
+            --accent: #c45c2d;
+            --accent-dark: #943e17;
+            --success: #1f7a4d;
+            --danger: #aa2e25;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Georgia, "Times New Roman", serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at top left, rgba(196, 92, 45, 0.18), transparent 28%),
+                linear-gradient(180deg, #f8f2e8 0%, var(--bg) 100%);
+            min-height: 100vh;
+        }
+
+        .page {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 32px 20px 48px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, rgba(255, 250, 242, 0.95), rgba(245, 232, 214, 0.92));
+            border: 1px solid rgba(196, 92, 45, 0.18);
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: 0 18px 45px rgba(70, 43, 24, 0.08);
+        }
+
+        .eyebrow {
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            font-size: 12px;
+            color: var(--accent-dark);
+            margin: 0 0 10px;
+        }
+
+        h1 {
+            font-size: clamp(34px, 5vw, 62px);
+            line-height: 0.95;
+            margin: 0 0 12px;
+        }
+
+        .lead {
+            max-width: 720px;
+            color: var(--muted);
+            font-size: 18px;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 18px;
+            margin-top: 22px;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 22px;
+            padding: 22px;
+            box-shadow: 0 12px 28px rgba(34, 34, 34, 0.05);
+        }
+
+        h2 {
+            margin: 0 0 14px;
+            font-size: 24px;
+        }
+
+        p.note {
+            margin: 0 0 14px;
+            color: var(--muted);
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        form {
+            display: grid;
+            gap: 12px;
+        }
+
+        label {
+            display: grid;
+            gap: 6px;
+            font-size: 14px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 12px 14px;
+            background: #fff;
+            color: var(--ink);
+            font: inherit;
+        }
+
+        textarea {
+            min-height: 96px;
+            resize: vertical;
+        }
+
+        button {
+            border: 0;
+            border-radius: 999px;
+            padding: 12px 18px;
+            background: var(--accent);
+            color: #fff8f0;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 120ms ease, background 120ms ease;
+        }
+
+        button:hover {
+            background: var(--accent-dark);
+            transform: translateY(-1px);
+        }
+
+        .secondary {
+            background: #efe1d2;
+            color: var(--ink);
+        }
+
+        .secondary:hover {
+            background: #e4d2bf;
+        }
+
+        .token-box, .output {
+            margin-top: 12px;
+            padding: 14px;
+            border-radius: 14px;
+            background: #fff;
+            border: 1px dashed var(--line);
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .status {
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .status.show { display: block; }
+        .status.success { background: rgba(31, 122, 77, 0.1); color: var(--success); }
+        .status.error { background: rgba(170, 46, 37, 0.1); color: var(--danger); }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .row > * {
+            flex: 1 1 180px;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <section class="hero">
+            <p class="eyebrow">LLM-Powered Research Assistant API</p>
+            <h1>Register, log in, and run research from the browser.</h1>
+            <p class="lead">This page talks to your Django API directly. Create an account, get a token, submit a company name, poll the job, and search reports without using curl.</p>
+        </section>
+
+        <section class="grid">
+            <div class="panel">
+                <h2>Register</h2>
+                <p class="note">Create a new account from the website.</p>
+                <form id="register-form">
+                    <label>Username <input name="username" required></label>
+                    <label>Email <input name="email" type="email" required></label>
+                    <label>Password <input name="password" type="password" required></label>
+                    <label>Confirm Password <input name="password2" type="password" required></label>
+                    <label>Subscription Tier
+                        <select name="subscription_tier">
+                            <option value="free">Free</option>
+                            <option value="pro">Pro</option>
+                        </select>
+                    </label>
+                    <button type="submit">Create Account</button>
+                </form>
+                <div id="register-status" class="status"></div>
+            </div>
+
+            <div class="panel">
+                <h2>Login</h2>
+                <p class="note">Use your account and store the access token in the page session.</p>
+                <form id="login-form">
+                    <label>Username <input name="username" required></label>
+                    <label>Password <input name="password" type="password" required></label>
+                    <button type="submit">Log In</button>
+                </form>
+                <div class="row" style="margin-top:12px;">
+                    <button id="load-profile" class="secondary" type="button">Load Profile</button>
+                    <button id="logout" class="secondary" type="button">Clear Token</button>
+                </div>
+                <div id="login-status" class="status"></div>
+                <div id="token-box" class="token-box">No token saved yet.</div>
+            </div>
+
+            <div class="panel">
+                <h2>Research Job</h2>
+                <p class="note">Submit a company name and create a background research job.</p>
+                <form id="job-form">
+                    <label>Company Name <input name="company_name" placeholder="Tesla" required></label>
+                    <button type="submit">Start Research</button>
+                </form>
+                <div class="row" style="margin-top:12px;">
+                    <input id="job-id-input" placeholder="Paste a job ID to poll">
+                    <button id="poll-job" class="secondary" type="button">Check Status</button>
+                    <button id="retry-job" class="secondary" type="button">Retry Failed Job</button>
+                </div>
+                <div id="job-status" class="status"></div>
+                <div id="job-output" class="output">No job submitted yet.</div>
+            </div>
+
+            <div class="panel">
+                <h2>Reports & Search</h2>
+                <p class="note">List your saved reports or run a semantic search query.</p>
+                <div class="row">
+                    <button id="list-reports" type="button">List Reports</button>
+                    <button id="load-health" class="secondary" type="button">API Health</button>
+                    <button id="load-usage" class="secondary" type="button">Usage Summary</button>
+                </div>
+                <div class="row" style="margin-top:12px;">
+                    <input id="search-query" placeholder="companies with high growth potential in AI">
+                    <button id="search-reports" class="secondary" type="button">Search</button>
+                </div>
+                <div class="row" style="margin-top:12px;">
+                    <input id="report-id-input" placeholder="Report ID for bookmark/export">
+                    <button id="export-report" class="secondary" type="button">Export Markdown</button>
+                </div>
+                <label style="margin-top:12px;">Analyst Notes
+                    <textarea id="report-notes" placeholder="Write your private notes about a report"></textarea>
+                </label>
+                <div class="row" style="margin-top:12px;">
+                    <button id="save-report-notes" type="button">Save Bookmark & Notes</button>
+                </div>
+                <div id="report-status" class="status"></div>
+                <div id="report-output" class="output">No report data loaded yet.</div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const storageKey = 'research_api_access_token';
+        const tokenBox = document.getElementById('token-box');
+
+        function getToken() {
+            return localStorage.getItem(storageKey) || '';
+        }
+
+        function setToken(token) {
+            if (token) {
+                localStorage.setItem(storageKey, token);
+            } else {
+                localStorage.removeItem(storageKey);
+            }
+            renderToken();
+        }
+
+        function renderToken() {
+            const token = getToken();
+            tokenBox.textContent = token ? `Saved access token:\n${token}` : 'No token saved yet.';
+        }
+
+        function setStatus(elementId, type, message) {
+            const el = document.getElementById(elementId);
+            el.className = `status show ${type}`;
+            el.textContent = message;
+        }
+
+        function clearStatus(elementId) {
+            const el = document.getElementById(elementId);
+            el.className = 'status';
+            el.textContent = '';
+        }
+
+        async function apiRequest(url, options = {}) {
+            const headers = new Headers(options.headers || {});
+            headers.set('Content-Type', 'application/json');
+            const token = getToken();
+            if (token) {
+                headers.set('Authorization', `Bearer ${token}`);
+            }
+            const response = await fetch(url, { ...options, headers });
+            const text = await response.text();
+            let data = text;
+            try {
+                data = text ? JSON.parse(text) : {};
+            } catch (_err) {}
+            if (!response.ok) {
+                const message = typeof data === 'object' ? JSON.stringify(data, null, 2) : text;
+                throw new Error(message || `Request failed with status ${response.status}`);
+            }
+            return data;
+        }
+
+        document.getElementById('register-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            clearStatus('register-status');
+            const form = new FormData(event.target);
+            const payload = Object.fromEntries(form.entries());
+            try {
+                const data = await apiRequest('/api/users/register/', {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                });
+                setStatus('register-status', 'success', `Account created for ${data.username || payload.username}. You can log in now.`);
+                event.target.reset();
+            } catch (error) {
+                setStatus('register-status', 'error', error.message);
+            }
+        });
+
+        document.getElementById('login-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            clearStatus('login-status');
+            const form = new FormData(event.target);
+            const payload = Object.fromEntries(form.entries());
+            try {
+                const data = await apiRequest('/api/users/login/', {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                });
+                setToken(data.access || '');
+                setStatus('login-status', 'success', 'Login successful. Access token saved in this browser.');
+            } catch (error) {
+                setStatus('login-status', 'error', error.message);
+            }
+        });
+
+        document.getElementById('load-profile').addEventListener('click', async () => {
+            clearStatus('login-status');
+            try {
+                const data = await apiRequest('/api/users/me/', { method: 'GET' });
+                setStatus('login-status', 'success', JSON.stringify(data, null, 2));
+            } catch (error) {
+                setStatus('login-status', 'error', error.message);
+            }
+        });
+
+        document.getElementById('logout').addEventListener('click', () => {
+            setToken('');
+            setStatus('login-status', 'success', 'Token cleared from this browser.');
+        });
+
+        document.getElementById('job-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            clearStatus('job-status');
+            const form = new FormData(event.target);
+            const payload = Object.fromEntries(form.entries());
+            try {
+                const data = await apiRequest('/api/research/jobs/', {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                });
+                document.getElementById('job-id-input').value = data.id || '';
+                document.getElementById('job-output').textContent = JSON.stringify(data, null, 2);
+                setStatus('job-status', 'success', 'Research job created.');
+            } catch (error) {
+                setStatus('job-status', 'error', error.message);
+            }
+        });
+
+        document.getElementById('poll-job').addEventListener('click', async () => {
+            clearStatus('job-status');
+            const jobId = document.getElementById('job-id-input').value.trim();
+            if (!jobId) {
+                setStatus('job-status', 'error', 'Enter a job ID first.');
+                return;
+            }
+            try {
+                const data = await apiRequest(`/api/research/jobs/${jobId}/`, { method: 'GET' });
+                document.getElementById('job-output').textContent = JSON.stringify(data, null, 2);
+                setStatus('job-status', 'success', `Job status: ${data.status}`);
+            } catch (error) {
+                setStatus('job-status', 'error', error.message);
+            }
+        });
+
+        document.getElementById('retry-job').addEventListener('click', async () => {
+            clearStatus('job-status');
+            const jobId = document.getElementById('job-id-input').value.trim();
+            if (!jobId) {
+                setStatus('job-status', 'error', 'Enter a failed job ID first.');
+                return;
+            }
+            try {
+                const data = await apiRequest(`/api/research/jobs/${jobId}/retry/`, { method: 'POST', body: '{}' });
+                document.getElementById('job-output').textContent = JSON.stringify(data, null, 2);
+                setStatus('job-status', 'success', 'Job requeued for retry.');
+            } catch (error) {
+                setStatus('job-status', 'error', error.message);
+            }
+        });
+
+        document.getElementById('list-reports').addEventListener('click', async () => {
+            clearStatus('report-status');
+            try {
+                const data = await apiRequest('/api/reports/', { method: 'GET' });
+                document.getElementById('report-output').textContent = JSON.stringify(data, null, 2);
+                setStatus('report-status', 'success', 'Reports loaded.');
+            } catch (error) {
+                setStatus('report-status', 'error', error.message);
+            }
+        });
+
+        document.getElementById('search-reports').addEventListener('click', async () => {
+            clearStatus('report-status');
+            const query = document.getElementById('search-query').value.trim();
+            if (!query) {
+                setStatus('report-status', 'error', 'Enter a search query first.');
+                return;
+            }
+            try {
+                const data = await apiRequest(`/api/search/?query=${encodeURIComponent(query)}`, { method: 'GET' });
+                document.getElementById('report-output').textContent = JSON.stringify(data, null, 2);
+                setStatus('report-status', 'success', 'Search results loaded.');
+            } catch (error) {
+                setStatus('report-status', 'error', error.message);
+            }
+        });
+
+        document.getElementById('load-health').addEventListener('click', async () => {
+            clearStatus('report-status');
+            try {
+                const data = await apiRequest('/api/health/', { method: 'GET' });
+                document.getElementById('report-output').textContent = JSON.stringify(data, null, 2);
+                setStatus('report-status', 'success', 'API health loaded.');
+            } catch (error) {
+                setStatus('report-status', 'error', error.message);
+            }
+        });
+
+        document.getElementById('load-usage').addEventListener('click', async () => {
+            clearStatus('report-status');
+            try {
+                const data = await apiRequest('/api/usage/summary/', { method: 'GET' });
+                document.getElementById('report-output').textContent = JSON.stringify(data, null, 2);
+                setStatus('report-status', 'success', 'Usage summary loaded.');
+            } catch (error) {
+                setStatus('report-status', 'error', error.message);
+            }
+        });
+
+        document.getElementById('save-report-notes').addEventListener('click', async () => {
+            clearStatus('report-status');
+            const reportId = document.getElementById('report-id-input').value.trim();
+            const notes = document.getElementById('report-notes').value;
+            if (!reportId) {
+                setStatus('report-status', 'error', 'Enter a report ID first.');
+                return;
+            }
+            try {
+                const data = await apiRequest(`/api/reports/${reportId}/organize/`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ is_bookmarked: true, analyst_notes: notes }),
+                });
+                document.getElementById('report-output').textContent = JSON.stringify(data, null, 2);
+                setStatus('report-status', 'success', 'Report bookmark and notes saved.');
+            } catch (error) {
+                setStatus('report-status', 'error', error.message);
+            }
+        });
+
+        document.getElementById('export-report').addEventListener('click', async () => {
+            clearStatus('report-status');
+            const reportId = document.getElementById('report-id-input').value.trim();
+            if (!reportId) {
+                setStatus('report-status', 'error', 'Enter a report ID first.');
+                return;
+            }
+            try {
+                const token = getToken();
+                const response = await fetch(`/api/reports/${reportId}/export/?file_format=md`, {
+                    method: 'GET',
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                });
+                const text = await response.text();
+                if (!response.ok) {
+                    throw new Error(text || 'Export failed.');
+                }
+                document.getElementById('report-output').textContent = text;
+                setStatus('report-status', 'success', 'Markdown export loaded below.');
+            } catch (error) {
+                setStatus('report-status', 'error', error.message);
+            }
+        });
+
+        renderToken();
+    </script>
+</body>
+</html>
