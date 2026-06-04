@@ -11,11 +11,20 @@ except Exception:  # pragma: no cover - graceful fallback for environments witho
     SentenceTransformer = None
 
 
+# @lru_cache(maxsize=1)
+# def _load_model():
+#     if SentenceTransformer is None:
+#         return None
+#     try:
+#         return SentenceTransformer(settings.EMBEDDING_MODEL_NAME)
+#     except Exception:
+#         return None
+
+
 @lru_cache(maxsize=1)
 def _load_model():
-    if SentenceTransformer is None:
-        return None
     try:
+        from sentence_transformers import SentenceTransformer
         return SentenceTransformer(settings.EMBEDDING_MODEL_NAME)
     except Exception:
         return None
