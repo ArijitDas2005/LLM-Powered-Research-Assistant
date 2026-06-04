@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM-Powered Research Assistant API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .status {
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+        .status-badge {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        .endpoints {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .endpoint-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        .endpoint-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        .endpoint-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        .endpoint-url {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #667eea;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            word-break: break-all;
+        }
+        .endpoint-desc {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .method-badge {
+            display: inline-block;
+            font-size: 0.75em;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 3px;
+            margin-right: 5px;
+        }
+        .get { background: #dbeafe; color: #0c4a6e; }
+        .post { background: #dcfce7; color: #166534; }
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #333;
+        }
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .feature {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .feature-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .feature-desc {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .info-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .info-box strong {
+            color: #92400e;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔬 LLM-Powered Research Assistant API</h1>
+        <p class="subtitle">Investment Research Reports powered by Claude AI</p>
+        
+        <div class="status">
+            <span class="status-badge">✓ SERVER RUNNING</span>
+            <p style="margin-top: 10px; color: #333;">
+                Your API is live and ready to use. Version 1.0 | Django 6.0.5 | DRF 3.17
+            </p>
+        </div>
+
+        <div class="info-box">
+            <strong>⚠️ Configuration Required:</strong><br>
+            To use the Claude AI integration, add your API key to the .env file:
+            <code style="display: block; margin-top: 8px; background: white; padding: 8px; border-radius: 4px;">
+                CLAUDE_API_KEY=sk-...
+                NEWSAPI_KEY=your-key
+            </code>
+        </div>
+
+        <h2 style="margin: 30px 0 20px 0; font-size: 1.5em; color: #333;">🎯 Core Features</h2>
+        <div class="features">
+            <div class="feature">
+                <div class="feature-title">🔐 User Authentication</div>
+                <div class="feature-desc">JWT-based authentication with subscription tiers (free/pro)</div>
+            </div>
+            <div class="feature">
+                <div class="feature-title">⚡ Async Research Jobs</div>
+                <div class="feature-desc">Celery-powered async task processing with Redis broker</div>
+            </div>
+            <div class="feature">
+                <div class="feature-title">📊 Data Aggregation</div>
+                <div class="feature-desc">Wikipedia, yfinance, and NewsAPI integration</div>
+            </div>
+            <div class="feature">
+                <div class="feature-title">🤖 Claude AI Integration</div>
+                <div class="feature-desc">Generate intelligent investment reports with Claude 3.5</div>
+            </div>
+            <div class="feature">
+                <div class="feature-title">🔍 Semantic Search</div>
+                <div class="feature-desc">Vector embeddings with pgvector/cosine similarity</div>
+            </div>
+            <div class="feature">
+                <div class="feature-title">📈 Usage Tracking</div>
+                <div class="feature-desc">Monitor API calls and LLM token consumption</div>
+            </div>
+        </div>
+
+        <h2 style="margin: 30px 0 20px 0; font-size: 1.5em; color: #333;">📡 API Endpoints</h2>
+        <div class="endpoints">
+            <div class="endpoint-card">
+                <div class="endpoint-title">
+                    <span class="method-badge get">GET</span> Health Check
+                </div>
+                <div class="endpoint-url">/api/health/</div>
+                <div class="endpoint-desc">Check API status and available endpoints</div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="endpoint-title">
+                    <span class="method-badge post">POST</span> User Login
+                </div>
+                <div class="endpoint-url">/api/users/login/</div>
+                <div class="endpoint-desc">Get JWT token with credentials</div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="endpoint-title">
+                    <span class="method-badge post">POST</span> Register User
+                </div>
+                <div class="endpoint-url">/api/users/register/</div>
+                <div class="endpoint-desc">Create new user account</div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="endpoint-title">
+                    <span class="method-badge get">GET</span> User Profile
+                </div>
+                <div class="endpoint-url">/api/users/me/</div>
+                <div class="endpoint-desc">Get authenticated user details</div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="endpoint-title">
+                    <span class="method-badge post">POST</span> Submit Research Job
+                </div>
+                <div class="endpoint-url">/api/research/jobs/</div>
+                <div class="endpoint-desc">Create async research job for company</div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="endpoint-title">
+                    <span class="method-badge get">GET</span> Research Jobs
+                </div>
+                <div class="endpoint-url">/api/research/jobs/{id}/</div>
+                <div class="endpoint-desc">Check job status and details</div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="endpoint-title">
+                    <span class="method-badge get">GET</span> Research Reports
+                </div>
+                <div class="endpoint-url">/api/reports/</div>
+                <div class="endpoint-desc">List generated research reports</div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="endpoint-title">
+                    <span class="method-badge get">GET</span> Semantic Search
+                </div>
+                <div class="endpoint-url">/api/search/?query=</div>
+                <div class="endpoint-desc">Search reports with semantic similarity</div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="endpoint-title">
+                    <span class="method-badge get">GET</span> Usage Analytics
+                </div>
+                <div class="endpoint-url">/api/usage/</div>
+                <div class="endpoint-desc">View API usage and token consumption</div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="endpoint-title">
+                    <span class="method-badge get">GET</span> Admin Panel
+                </div>
+                <div class="endpoint-url">/admin/</div>
+                <div class="endpoint-desc">Django admin interface</div>
+            </div>
+        </div>
+
+        <h2 style="margin: 30px 0 20px 0; font-size: 1.5em; color: #333;">🚀 Quick Start</h2>
+        <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="margin-bottom: 10px; color: #333;">1. Register a new user</h3>
+            <code style="display: block; background: white; padding: 10px; border-radius: 4px; overflow-x: auto;">
+POST /api/users/register/<br>
+{ "username": "user123", "email": "user@example.com", "password": "secure123" }
+            </code>
+
+            <h3 style="margin: 15px 0 10px 0; color: #333;">2. Login to get JWT token</h3>
+            <code style="display: block; background: white; padding: 10px; border-radius: 4px; overflow-x: auto;">
+POST /api/users/login/<br>
+{ "username": "user123", "password": "secure123" }
+            </code>
+
+            <h3 style="margin: 15px 0 10px 0; color: #333;">3. Submit research job</h3>
+            <code style="display: block; background: white; padding: 10px; border-radius: 4px; overflow-x: auto;">
+POST /api/research/jobs/<br>
+{ "company_name": "Apple Inc" }<br>
+<em style="color: #666;">Requires: Authorization: Bearer {token}</em>
+            </code>
+
+            <h3 style="margin: 15px 0 10px 0; color: #333;">4. Check job status</h3>
+            <code style="display: block; background: white; padding: 10px; border-radius: 4px; overflow-x: auto;">
+GET /api/research/jobs/{job_id}/<br>
+<em style="color: #666;">Requires: Authorization: Bearer {token}</em>
+            </code>
+        </div>
+
+        <div class="buttons">
+            <a href="/api/health/" class="btn btn-primary">📊 API Status</a>
+            <a href="/admin/" class="btn btn-primary">🔧 Admin Panel</a>
+            <a href="https://github.com" class="btn btn-secondary">📖 Documentation</a>
+        </div>
+
+        <div class="footer">
+            <p>✨ LLM-Powered Research Assistant API v1.0</p>
+            <p>Running on Django 6.0.5 • DRF 3.17 • Celery 5.6 • Claude AI Integration</p>
+            <p>📧 For support, check the API documentation or submit an issue on GitHub</p>
+        </div>
+    </div>
+</body>
+</html>
